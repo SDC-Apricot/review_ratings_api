@@ -2,9 +2,13 @@ const express = require('express');
 const app = express();
 
 
-app.get('/', (req, res) => {
-  console.log('This is just the setup!');
+app.get('/reviews', (req, res) => {
+  console.log('Getting the reviews');
 });
+
+app.post('/reviews', (req, res) => {
+  console.log('Posting the reviews')
+})
 
 const port = 3001;
 

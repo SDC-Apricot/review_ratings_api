@@ -19,6 +19,8 @@
   "homepage": "https://github.com/SDC-Apricot/review_ratings_api#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "jest": "^27.0.6"
+    "jest": "^27.0.6",
+    "nodemon": "^2.0.12",
+    "pg": "^8.6.0"
   }
 }
