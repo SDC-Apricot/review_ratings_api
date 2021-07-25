@@ -5,4 +5,4 @@ const client = new Client ({connectionString: cred.credentials})
 
 client.connect();
 
-module.exports = client;
+module.exports.client = client;
