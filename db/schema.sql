@@ -22,22 +22,14 @@ CREATE TABLE reviews (
 DROP TABLE IF EXISTS reviews_photos;
 CREATE TABLE reviews_photos (
   id INTEGER PRIMARY KEY,
-  review_id INTEGER,
+  review_id INTEGER REFERENCES reviews(id),
   url VARCHAR
-);
-
-DROP TABLE IF EXISTS features;
-CREATE TABLE features (
-  id INTEGER PRIMARY KEY,
-  product_id INTEGER,
-  feature VARCHAR,
-  value VARCHAR
 );
 
 DROP TABLE IF EXISTS characteristics;
 CREATE TABLE characteristics (
   id INTEGER PRIMARY KEY,
-  product_id INTEGER,
+  product_id INTEGER REFERENCES reviews(product_id,
   name VARCHAR
 );
 
@@ -62,5 +54,4 @@ CREATE temporary TABLE tempreviews (
 INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness) SELECT id, product_id, rating, to_timestamp(date/1000)::date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness FROM tempreviews
 
 \COPY reviews_photos (id, review_id, url) FROM '/Users/simonsi/Desktop/SDC REVIEW DATA/reviews_photos.csv' DELIMITER ',' CSV HEADER;
-\COPY features (id, product_id, feature, value) FROM '/Users/simonsi/Desktop/SDC REVIEW DATA/features.csv' DELIMITER ',' CSV HEADER;
 \COPY characteristics (id, product_id, name) FROM '/Users/simonsi/Desktop/SDC REVIEW DATA/characteristics.csv' DELIMITER ',' CSV HEADER;

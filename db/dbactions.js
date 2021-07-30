@@ -41,12 +41,25 @@ async function getMeta(req, res) {
 
 async function postReviews(req, res) {
   //posts new reviews for product_id
-  let stringQuery = ``
+
+}
+
+async function addToReviews() {
+  let stringQuery = `INSERT INTO reviews (product_id, rating, summary, body, recommend, reviewer_name, reviewer_email) VALUES`
+  db.client
+    .query(stringQuery)
+}
+
+async function addToPhotos(photoUrlList) {
+  photoUrlList.forEach(url => {
+  let stringQuery = `INSERT INTO reviews_photos (review_id, url)`
+    db.client.query(stringQuery)
+  })
 }
 
 function updateHelpfulness(req, res) {
   //update helpfulness by 1 of product_id
-  let stringQuery = `UPDATE characteristics SET helpfulness = helpfulness + 1 WHERE id=${req.query.id} AND product_id=${product_id}`
+  let stringQuery = `UPDATE characteristics SET helpfulness = helpfulness + 1 WHERE id=${req.query.id} AND product_id=${req.query.product_id}`
   db.client
     .query(stringQuery)
     .then(() => res.status(200))
@@ -55,8 +68,11 @@ function updateHelpfulness(req, res) {
 
 const reported = (req, res) => {
   //update report status of product_id
-  let stringQuery = ``
-
+  let stringQuery = `UPDATE reviews SET reported = true WHERE id=${req.query.product_id}`
+  db.client
+    .query(stringQuery)
+    .then(() => res.status(200))
+    .catch(res.send(err))
 }
 
 
