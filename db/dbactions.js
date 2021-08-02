@@ -2,19 +2,23 @@ const db = require('./index.js');
 
 async function getReviews(req, res) {
   const {product_id, count} = req.query;
+  if (req.query.product_id !== '') {
 
-  const reviews = await getData(product_id, count)
-    .catch(err => res.send(err));
+    const reviews = await getData(product_id, count)
+      .catch(err => res.send(err));
 
-  const result = await Promise.all(reviews.map(async (review) => {
-    let photos = await getReviewPhotos(review.id).catch(e => []);
-    return {
-      ...review,
-      photos
-    }
-  }))
+    const result = await Promise.all(reviews.map(async (review) => {
+      let photos = await getReviewPhotos(review.id).catch(e => []);
+      return {
+        ...review,
+        photos
+      }
+    }))
 
   res.send(result)
+  } else {
+    res.sendStatus(404)
+  }
 }
 
 async function getData(id, count) {
