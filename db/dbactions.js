@@ -33,14 +33,14 @@ async function getReviewPhotos(id) {
 
 async function getMeta(req, res) {
   //check if required params are provided
-  if (req.query.product_id === '' || typeof req.query.product_id !== 'number') {
+  if (req.query.product_id !== '') {
     let stringQuery = `SELECT * FROM characteristics WHERE product_id=${req.query.product_id}`
     db.client
     .query(stringQuery)
     .then(results => res.send(results.rows))
     .catch(err => res.send(err))
   } else {
-    res.status(404)
+    res.sendStatus(404)
   }
 }
 
@@ -81,7 +81,7 @@ const reported = (req, res) => {
   let stringQuery = `UPDATE reviews SET reported = true WHERE id=${req.query.product_id}`
   db.client
     .query(stringQuery)
-    .then(() => res.status(200))
+    .then(() => res.sendStatus(200))
     .catch(res.send(err))
 }
 
