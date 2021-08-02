@@ -32,34 +32,44 @@ async function getReviewPhotos(id) {
 
 
 async function getMeta(req, res) {
-  let stringQuery = `SELECT * FROM characteristics WHERE product_id=${req.query.product_id}`
-  db.client
+  //check if required params are provided
+  if (req.query.product_id === '' || typeof req.query.product_id !== 'number') {
+    let stringQuery = `SELECT * FROM characteristics WHERE product_id=${req.query.product_id}`
+    db.client
     .query(stringQuery)
-    .then(results => res.send(results))
+    .then(results => res.send(results.rows))
     .catch(err => res.send(err))
+  } else {
+    res.status(404)
+  }
 }
 
 async function postReviews(req, res) {
   //posts new reviews for product_id
-
+  await addToReviews(req.body);
+  await addToPhotos(req.body,photos);
 }
 
-async function addToReviews() {
-  let stringQuery = `INSERT INTO reviews (product_id, rating, summary, body, recommend, reviewer_name, reviewer_email) VALUES`
+async function addToReviews(data) {
+  const {product_id, rating, summary, body, recommend, name, email} = data
+  let stringQuery = `INSERT INTO reviews (product_id, rating, summary, body, recommend, reviewer_name, reviewer_email) VALUES (${product_id}, ${rating}, ${summary}, ${body}, ${recommend}, ${name}, ${email})`
   db.client
     .query(stringQuery)
+    .catch(err => err)
 }
 
 async function addToPhotos(photoUrlList) {
   photoUrlList.forEach(url => {
-  let stringQuery = `INSERT INTO reviews_photos (review_id, url)`
-    db.client.query(stringQuery)
+  let stringQuery = `INSERT INTO reviews_photos (review_id, url) VALUES (${url})`
+    db.client
+    .query(stringQuery)
+    .catch(err => err)
   })
 }
 
 function updateHelpfulness(req, res) {
   //update helpfulness by 1 of product_id
-  let stringQuery = `UPDATE characteristics SET helpfulness = helpfulness + 1 WHERE id=${req.query.id} AND product_id=${req.query.product_id}`
+  let stringQuery = `UPDATE reviews SET helpfulness = helpfulness + 1 WHERE id=${req.query.id} AND product_id=${req.query.product_id}`
   db.client
     .query(stringQuery)
     .then(() => res.status(200))
@@ -76,4 +86,10 @@ const reported = (req, res) => {
 }
 
 
-module.exports = {getReviews, getMeta, getData, postReviews, updateHelpfulness, reported, getReviewPhotos}
+module.exports = {getReviews,
+                  getMeta,
+                  getData,
+                  postReviews,
+                  updateHelpfulness,
+                  reported,
+                  getReviewPhotos}
