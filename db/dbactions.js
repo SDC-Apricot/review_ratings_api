@@ -24,8 +24,9 @@ async function getReviews(req, res) {
 async function getData(id, count) {
   let stringQuery = `SELECT * FROM reviews WHERE product_id=${id}`;
   if (count) {
-    stringQuery.concat(`LIMIT ${count}`)
+    stringQuery = stringQuery.concat(` LIMIT ${count}`)
   };
+  console.log(stringQuery)
   return db.client.query(stringQuery).then(reviews => reviews.rows)
 }
 

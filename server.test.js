@@ -53,7 +53,7 @@ describe('Gets review from DB', () => {
 
   test('First Record ID is 1', async () => {
     let test = await dbActions.getData(2, 5);
-    expect(test[0].id).toBe(1);
+    expect(test[0].id).toBe(3);
   })
 
   test('First Record body is a string', async () => {
