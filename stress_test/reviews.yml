@@ -1,18 +1,15 @@
 config:
-  target: "http://localhost:3001/"
+  target: "http://localhost:3001"
   phases:
+    - duration: 5
+      arrivalRate: 20
+      name: test
     - duration: 60
-      arrivalRate: 5
-      name: Warm up
-    - duration: 120
-      arrivalRate: 5
-      rampTo: 50
-      name: Ramp up load
-    - duration: 600
-      arrivalRate: 50
-      name: Sustained load
+      arrivalRate: 100
+      rampTo: 500
+  processor: "./helper.js"
 scenarios:
   - name: "Get All reviews of specific product"
     flow:
       - get:
-        url: "/reviews"
+          url: "/reviews/?product_id={{ id }}"
