@@ -21,6 +21,7 @@ async function getReviews(req, res) {
   }
 }
 
+//gets record from reviews table
 async function getData(id, count) {
   let stringQuery = `SELECT * FROM reviews WHERE product_id=${id}`;
   if (count) {
@@ -30,14 +31,14 @@ async function getData(id, count) {
   return db.client.query(stringQuery).then(reviews => reviews.rows)
 }
 
+//gets records from review_photos table
 async function getReviewPhotos(id) {
   let stringQuery = `SELECT id, url  FROM reviews_photos WHERE review_id = ${id}`
   return db.client.query(stringQuery).then(photos => photos.rows)
 }
 
-
+//gets Meta data
 async function getMeta(req, res) {
-  //check if required params are provided
   if (req.query.product_id !== '') {
     let stringQuery = `SELECT * FROM characteristics WHERE product_id=${req.query.product_id}`
     db.client
@@ -49,13 +50,17 @@ async function getMeta(req, res) {
   }
 }
 
+//Posting reviews
 async function postReviews(req, res) {
   //posts new reviews for product_id
   await addToReviews(req.body);
-  await addToPhotos(req.body,photos);
+  await addToPhotos(req.body.photos);
+  .catch(err => res.sendStatus(500))
+  .then(() => res.sendStatus(200))
 }
 
-async function addToReviews(data) {
+//adds to review table
+function addToReviews(data) {
   const {product_id, rating, summary, body, recommend, name, email} = data
   let stringQuery = `INSERT INTO reviews (product_id, rating, summary, body, recommend, reviewer_name, reviewer_email) VALUES (${product_id}, ${rating}, ${summary}, ${body}, ${recommend}, ${name}, ${email})`
   db.client
@@ -63,7 +68,8 @@ async function addToReviews(data) {
     .catch(err => err)
 }
 
-async function addToPhotos(photoUrlList) {
+//adds to review_photos table
+function addToPhotos(photoUrlList) {
   photoUrlList.forEach(url => {
   let stringQuery = `INSERT INTO reviews_photos (review_id, url) VALUES (${url})`
     db.client
@@ -72,6 +78,7 @@ async function addToPhotos(photoUrlList) {
   })
 }
 
+//updates helpfulness on reviews table
 function updateHelpfulness(req, res) {
   //update helpfulness by 1 of product_id
   let stringQuery = `UPDATE reviews SET helpfulness = helpfulness + 1 WHERE id=${req.query.id} AND product_id=${req.query.product_id}`
@@ -81,6 +88,7 @@ function updateHelpfulness(req, res) {
     .catch(res.send(err))
 }
 
+//updates reported on reviews table
 const reported = (req, res) => {
   //update report status of product_id
   let stringQuery = `UPDATE reviews SET reported = true WHERE id=${req.query.product_id}`
