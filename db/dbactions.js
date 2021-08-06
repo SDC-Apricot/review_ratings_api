@@ -27,7 +27,6 @@ async function getData(id, count) {
   if (count) {
     stringQuery = stringQuery.concat(` LIMIT ${count}`)
   };
-  console.log(stringQuery)
   return db.client.query(stringQuery).then(reviews => reviews.rows)
 }
 
@@ -53,14 +52,14 @@ async function getMeta(req, res) {
 //Posting reviews
 async function postReviews(req, res) {
   //posts new reviews for product_id
-  await addToReviews(req.body);
-  await addToPhotos(req.body.photos);
+  await addToReviews(req.body)
+  await addToPhotos(req.body.photos)
   .catch(err => res.sendStatus(500))
   .then(() => res.sendStatus(200))
 }
 
 //adds to review table
-function addToReviews(data) {
+async function addToReviews(data) {
   const {product_id, rating, summary, body, recommend, name, email} = data
   let stringQuery = `INSERT INTO reviews (product_id, rating, summary, body, recommend, reviewer_name, reviewer_email) VALUES (${product_id}, ${rating}, ${summary}, ${body}, ${recommend}, ${name}, ${email})`
   db.client
@@ -69,7 +68,7 @@ function addToReviews(data) {
 }
 
 //adds to review_photos table
-function addToPhotos(photoUrlList) {
+async function addToPhotos(photoUrlList) {
   photoUrlList.forEach(url => {
   let stringQuery = `INSERT INTO reviews_photos (review_id, url) VALUES (${url})`
     db.client
@@ -81,7 +80,7 @@ function addToPhotos(photoUrlList) {
 //updates helpfulness on reviews table
 function updateHelpfulness(req, res) {
   //update helpfulness by 1 of product_id
-  let stringQuery = `UPDATE reviews SET helpfulness = helpfulness + 1 WHERE id=${req.query.id} AND product_id=${req.query.product_id}`
+  let stringQuery = `UPDATE reviews SET helpfulness = helpfulness + 1 WHERE id=${req.params.review_id}`
   db.client
     .query(stringQuery)
     .then(() => res.status(200))

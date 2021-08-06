@@ -1,9 +1,9 @@
 const { expect } = require("@jest/globals");
-const server = require('./server/app.js');
-const dbActions = require('./db/dbactions.js');
-const axios = require('axios');
-const db = require('./db/index.js');
-const supertest = require("supertest");
+const server = require("./server/app.js");
+const dbActions = require("./db/dbactions.js");
+const db = require("./db/index.js");
+const request = require("supertest");
+const app = require("./server/app.js");
 
 describe('This is just a test', () => {
   function add(a, b){
@@ -62,8 +62,40 @@ describe('Gets review from DB', () => {
   })
 })
 
-// describe('Updates Helpfulness', () => {
-//   test('Increase helpfulness count by 1', async () => {
-//     let original = await db.client.query(SELECT helpfulness FROM reviews)
-//     dbActions.updateHelpfulness()
-//   })
+
+describe('GET request', () => {
+  test('Get requests return properly', (done) => {
+     request(app)
+      .get('/reviews')
+      .query({product_id: 1000011})
+      .then((response) => {
+        expect(Array.isArray(response.body)).toBe(true);
+        expect(response.body.length > 0).toBe(true);
+        done();
+      })
+      .catch(err => console.log(err))
+      done();
+  })
+})
+
+describe('Helpfulness update', () => {
+  test('Put request to update Helpfuless in reviews', (done) => {
+    let id = 5774952;
+    let original;
+    let updated;
+    db.client.query(`SELECT helpfulness FROM reviews WHERE id=${id}`)
+      .then((results) => {original = results.rows[0].helpfulness})
+      .then(() => {
+        request(app)
+        .put('/reviews/5774952/helpful')
+        .then(()=>{
+          db.client.query(`SELECT helpfulness FROM reviews WHERE id=${id}`)
+          .then((results) => {
+            expect(original !== results.rows[0].helpfulness).toBe(true);
+            done()
+          })
+        })
+      })
+      .catch(err => console.log(err))
+  })
+})
