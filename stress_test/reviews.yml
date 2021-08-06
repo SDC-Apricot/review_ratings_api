@@ -1,0 +1,19 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 5
+      arrivalRate: 20
+      name: test
+    - duration: 60
+      arrivalRate: 500
+      rampTo: 1000
+  processor: "./helper.js"
+scenarios:
+  - name: "Get All reviews of specific product"
+    flow:
+      - get:
+          url: "/reviews/?product_id={{ id }}"
+  - name: "Get meta Data of specific product"
+    flow:
+      - get:
+          url: "/reviews/meta/?product_id={{ id }}"

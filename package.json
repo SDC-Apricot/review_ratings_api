@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "jest --coverage",
-    "start": "node server.js"
+    "start": "node ./server/app.js"
   },
   "repository": {
     "type": "git",
@@ -18,9 +18,13 @@
   },
   "homepage": "https://github.com/SDC-Apricot/review_ratings_api#readme",
   "dependencies": {
+    "axios": "^0.21.1",
     "express": "^4.17.1",
     "jest": "^27.0.6",
     "nodemon": "^2.0.12",
     "pg": "^8.6.0"
+  },
+  "devDependencies": {
+    "supertest": "^6.1.4"
   }
 }
