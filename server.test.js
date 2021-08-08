@@ -82,7 +82,6 @@ describe('Helpfulness update', () => {
   test('Put request to update Helpfuless in reviews', (done) => {
     let id = 5774952;
     let original;
-    let updated;
     db.client.query(`SELECT helpfulness FROM reviews WHERE id=${id}`)
       .then((results) => {original = results.rows[0].helpfulness})
       .then(() => {
@@ -92,6 +91,27 @@ describe('Helpfulness update', () => {
           db.client.query(`SELECT helpfulness FROM reviews WHERE id=${id}`)
           .then((results) => {
             expect(original !== results.rows[0].helpfulness).toBe(true);
+            done()
+          })
+        })
+      })
+      .catch(err => console.log(err))
+  })
+})
+
+describe('Reported update', () => {
+  test('Put request to update reported in reviews', (done) =>{
+    let id = 1002;
+    let original;
+    db.client.query(`SELECT reported FROM reviews WHERE id=${id}`)
+      .then((results) => {original = results.row[0].reported})
+      .then(() => {
+        request(app)
+        .put('/reviews/1002/report')
+        .then(()=>{
+          db.client.query(`SELECT reported FROM reviews WHERE id=${id}`)
+          .then((results) => {
+            expect(original !== results.rows[0].reported).toBe(true);
             done()
           })
         })

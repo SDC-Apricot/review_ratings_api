@@ -90,7 +90,8 @@ function updateHelpfulness(req, res) {
 //updates reported on reviews table
 const reported = (req, res) => {
   //update report status of product_id
-  let stringQuery = `UPDATE reviews SET reported = true WHERE id=${req.query.product_id}`
+  console.log('reported')
+  let stringQuery = `UPDATE reviews SET reported = true WHERE id=${req.params.product_id}`
   db.client
     .query(stringQuery)
     .then(() => res.sendStatus(200))
