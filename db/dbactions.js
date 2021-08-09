@@ -38,15 +38,91 @@ async function getReviewPhotos(id) {
 
 //gets Meta data
 async function getMeta(req, res) {
+  let results = { product_id: req.query.product_id }
   if (req.query.product_id !== '') {
-    let stringQuery = `SELECT * FROM characteristics WHERE product_id=${req.query.product_id}`
-    db.client
-    .query(stringQuery)
-    .then(results => res.send(results.rows))
-    .catch(err => res.send(err))
+    const { product_id } = req.query
+     results.rating = await getRating(product_id)
+     results.recommend = await getRecommend(product_id)
+     results.characteristics = await getCharacteristics(product_id)
+
+     res.send(results)
   } else {
     res.sendStatus(404)
   }
+}
+
+async function getCharacteristics(productId) {
+  let stringQuery = `SELECT
+                        c.name AS NAME,
+                        c.id AS ID,
+                        round(avg(cr.value)::numeric,2) AS AVG
+                      FROM
+                        characteristics AS c,
+                        characteristic_reviews AS cr
+                      WHERE
+                        c.product_id=${productId} AND cr.characteristic_id = c.id
+                      GROUP BY
+                        c.id`
+  return db.client.query(stringQuery)
+    .then(results => {
+      let allCharacteristics = {}
+      results.rows.forEach(char => {
+        allCharacteristics[char.name] = {"id": char.id, "value": char.avg}
+      })
+      return allCharacteristics;
+    })
+    .catch(err => console.log(err))
+}
+
+async function getRating(productId){
+  let stringQuery = `SELECT
+                      rating,
+                      count(rating) AS count
+                    FROM reviews
+                    WHERE product_id = ${productId}
+                    GROUP BY rating`
+  return db.client.query(stringQuery)
+    .then(results => {
+      let ratingTally = {
+        '1':0,
+        '2':0,
+        '3':0,
+        '4':0,
+        '5':0
+      }
+
+      results.rows.forEach(rating => {
+        ratingTally[rating.rating] += Number(rating.count)
+      })
+
+      return ratingTally;
+    })
+    .catch(err => console.log(err))
+}
+
+async function getRecommend(productId) {
+  let stringQuery = `SELECT
+                      recommend,
+                      count(recommend) AS count
+                    FROM
+                      reviews
+                    WHERE
+                      product_id=${productId}
+                    GROUP BY recommend`
+
+  return db.client.query(stringQuery)
+    .then(results => {
+      let recommend = {};
+      results.rows.forEach(rec => {
+        if (rec.recommend === true) {
+          recommend["0"] = rec.count
+        } else {
+          recommend["1"] = rec.count
+        }
+      })
+      return recommend
+    })
+    .catch(err => console.log(err))
 }
 
 //Posting reviews
