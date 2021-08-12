@@ -66,7 +66,7 @@ async function getCharacteristics(productId) {
                         c.product_id=${productId} AND cr.characteristic_id = c.id
                       GROUP BY
                         c.id`
-  return db.client.query(stringQuery)
+  db.client.query(stringQuery)
     .then(results => {
       let allCharacteristics = {}
       results.rows.forEach(char => {
