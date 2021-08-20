@@ -1,42 +1,53 @@
 const db = require('./index.js');
 
-/**GET REQUEST - REVIEWS**/
+/**GET REQUEST REVIEWS**/
 async function getReviews(req, res) {
   const {product_id, count} = req.query;
   if (req.query.product_id !== '') {
-
-    const reviews = await getData(product_id, count)
-      .catch(err => res.send(err));
-
-    const result = await Promise.all(reviews.map(async (review) => {
-      let photos = await getReviewPhotos(review.id).catch(e => []);
-      return {
-        ...review,
-        photos
-      }
-    }))
-
-  res.send(result)
+    let reviewData = await getData(product_id, count)
+    console.log("test", testing)
+    res.send({
+      "product": product_id,
+      "results": reviewData
+    })
   } else {
     res.sendStatus(404)
   }
+
+
 }
 
-//gets record from reviews table
-async function getData(id, count) {
-  let stringQuery = `SELECT * FROM reviews WHERE product_id=${id}`;
-  if (count) {
-    stringQuery = stringQuery.concat(` LIMIT ${count}`)
-  };
-  return db.client.query(stringQuery).then(reviews => reviews.rows)
-}
+async function getData(productId, count) {
+  let stringQuery = `
+    SELECT array_agg(row_to_json(a))
+    FROM (
+      SELECT id AS review_id,
+      rating,
+      summary,
+      recommend,
+      response,
+      body,
+      date,
+      reviewer_name,
+      helpfulness,
+      (SELECT array_to_json(array_agg(row_to_json(b)))
+        FROM (SELECT id, url FROM reviews_photos
+          WHERE review_id=reviews.id)b) AS photos
+      FROM reviews
+    `
 
-//gets records from review_photos table
-async function getReviewPhotos(id) {
-  let stringQuery = `SELECT id, url  FROM reviews_photos WHERE review_id = ${id}`
-  return db.client.query(stringQuery).then(photos => photos.rows)
+    if (count) {
+      stringQuery = stringQuery.concat(` WHERE product_id=${productId} LIMIT ${count}) a`)
+    } else {
+      stringQuery = stringQuery.concat(`WHERE product_id=${productId}) a`)
+    }
+
+
+  return db.client.query(stringQuery)
+    .then(results => results.rows[0].array_agg)
+    .catch(err => console.error(err))
 }
-/**GET REQUEST - REVIEWS END**/
+/**GET REQUEST REVIEWS **/
 
 /**GET REQUEST - META**/
 //gets Meta data
@@ -239,4 +250,43 @@ module.exports = {getReviews,
                   postReviews,
                   updateHelpfulness,
                   reported,
-                  getReviewPhotos}
+                  // getReviewPhotos,
+                }
+
+                // /**LEGACY GET REQUEST - REVIEWS**/
+// async function getReviews(req, res) {
+//   const {product_id, count} = req.query;
+//   if (req.query.product_id !== '') {
+
+//     const reviews = await getData(product_id, count)
+//       .catch(err => res.send(err));
+
+//     const result = await Promise.all(reviews.map(async (review) => {
+//       let photos = await getReviewPhotos(review.id).catch(e => []);
+//       return {
+//         ...review,
+//         photos
+//       }
+//     }))
+
+//   res.send(result)
+//   } else {
+//     res.sendStatus(404)
+//   }
+// }
+
+// //gets record from reviews table
+// async function getData(id, count) {
+//   let stringQuery = `SELECT * FROM reviews WHERE product_id=${id}`;
+//   if (count) {
+//     stringQuery = stringQuery.concat(` LIMIT ${count}`)
+//   };
+//   return db.client.query(stringQuery).then(reviews => reviews.rows)
+// }
+
+// //gets records from review_photos table
+// async function getReviewPhotos(id) {
+//   let stringQuery = `SELECT id, url  FROM reviews_photos WHERE review_id = ${id}`
+//   return db.client.query(stringQuery).then(photos => photos.rows)
+// }
+/**GET REQUEST - REVIEWS END**/
