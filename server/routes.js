@@ -8,6 +8,5 @@ router.post('/reviews', dbAction.postReviews)
 router.put('/reviews/:review_id/helpful', dbAction.updateHelpfulness)
 router.put('/reviews/:review_id/report', dbAction.reported)
 
-// router.get('/test', dbAction.test)
 
 module.exports = router;

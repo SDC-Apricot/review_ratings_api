@@ -5,7 +5,6 @@ async function getReviews(req, res) {
   const {product_id, count} = req.query;
   if (req.query.product_id !== '') {
     let reviewData = await getData(product_id, count)
-    console.log("test", testing)
     res.send({
       "product": product_id,
       "results": reviewData
@@ -37,9 +36,9 @@ async function getData(productId, count) {
     `
 
     if (count) {
-      stringQuery = stringQuery.concat(` WHERE product_id=${productId} LIMIT ${count}) a`)
+      stringQuery = stringQuery.concat(` WHERE product_id=${productId} LIMIT ${count}) a;`)
     } else {
-      stringQuery = stringQuery.concat(`WHERE product_id=${productId}) a`)
+      stringQuery = stringQuery.concat(`WHERE product_id=${productId}) a;`)
     }
 
 
