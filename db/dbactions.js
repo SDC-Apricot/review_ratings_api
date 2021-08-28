@@ -1,19 +1,42 @@
 const db = require('./index.js');
+const redis = require('redis');
+const cred = require('./config.js')
+
+const client = redis.createClient({
+  host: cred.redis,
+  port: cred.port
+});
+
+
+function cache (req, res, next) {
+  const {product_id} = req.query;
+  client.get(`Product_id: ${product_id}`, (err, reviews) => {
+    if(err) throw err;
+    if(reviews !== null) {
+      res.send(JSON.parse(reviews));
+    } else {
+      next();
+    }
+  })
+}
 
 /**GET REQUEST REVIEWS**/
 async function getReviews(req, res) {
   const {product_id, count} = req.query;
-  if (req.query.product_id !== '') {
-    let reviewData = await getData(product_id, count)
-    res.send({
-      "product": product_id,
-      "results": reviewData
-    })
-  } else {
+
+  try {
+    if (product_id !== '') {
+      let reviewData = await getData(product_id, count)
+      let final = {
+        "product": product_id,
+        "results": reviewData
+      };
+      client.set(`Product_id: ${product_id}`, JSON.stringify(final))
+      res.send(final)
+    }
+  } catch (err){
     res.sendStatus(404)
   }
-
-
 }
 
 async function getData(productId, count) {
@@ -249,10 +272,12 @@ module.exports = {getReviews,
                   postReviews,
                   updateHelpfulness,
                   reported,
+                  cache
                   // getReviewPhotos,
                 }
 
                 // /**LEGACY GET REQUEST - REVIEWS**/
+
 // async function getReviews(req, res) {
 //   const {product_id, count} = req.query;
 //   if (req.query.product_id !== '') {
