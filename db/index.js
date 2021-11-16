@@ -3,7 +3,6 @@ const cred = require('./config.js');
 
 const client = new Client ({connectionString: cred.credentials})
 
-// client.connect();
 
 var connect = async () => {
   await client.connect((err) => {

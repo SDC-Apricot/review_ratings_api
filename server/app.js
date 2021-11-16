@@ -4,7 +4,6 @@ const router = require('./routes.js')
 
 app.use(express.urlencoded({extended: true}));
 
-//routes the requests through server routers
 app.use('/', router);
 
 const port = 3001;
