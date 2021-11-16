@@ -20,7 +20,6 @@ function cache (req, res, next) {
   })
 }
 
-/**GET REQUEST REVIEWS**/
 async function getReviews(req, res) {
   const {product_id, count} = req.query;
 
@@ -69,10 +68,7 @@ async function getData(productId, count) {
     .then(results => results.rows[0].array_agg)
     .catch(err => console.error(err))
 }
-/**GET REQUEST REVIEWS **/
 
-/**GET REQUEST - META**/
-//gets Meta data
 async function getMeta(req, res) {
   let results = { product_id: req.query.product_id }
   if (req.query.product_id !== '') {
@@ -160,9 +156,7 @@ async function getRecommend(productId) {
     })
     .catch(err => console.log(err))
 }
-/**GET REQUEST - META END**/
 
-/** POST REQUEST**/
 async function postReviews(req, res) {
   let reviewId;
   await addToReviews(req.body)
@@ -180,7 +174,6 @@ async function postReviews(req, res) {
   .catch(err => res.sendStatus(500))
 }
 
-//adds to review table
 async function addToReviews(data) {
   const {product_id, rating, summary, body, recommend, name, email} = data
   let stringQuery = `INSERT INTO
@@ -193,7 +186,6 @@ async function addToReviews(data) {
     .catch(err => err)
 }
 
-//add to characteristics table
 async function addToCharacteristics(productId, characteristics) {
   let charRev = [];
   for (char in characteristics) {
@@ -206,14 +198,12 @@ async function addToCharacteristics(productId, characteristics) {
       .then(async results => {
         let charId = results.rows[0].id
         charRev.push({characteristic_id: charId, value: characteristic[char]})
-        // await addToCharacteristicsReviews(charId, reviewId, characteristics[char])
       })
       .then(() => charRev)
       .catch(err => console.log(err))
   }
 }
 
-//adds to characteristic_reviews table
 async function addToCharacteristicsReviews(charRev, reviewId) {
 
   let insertValues = charRev.map(char => `(${char.characteristic_id}, ${reviewId}, ${char.value})`).join(',')
@@ -225,7 +215,6 @@ async function addToCharacteristicsReviews(charRev, reviewId) {
     .catch(err => console.log(err))
 }
 
-//add to reviews_photos table
 async function addToPhotos(review_id, photoList) {
 
   let insertValues = photoList.map(url => `(${review_id}, ${url})`).join(',')
@@ -239,11 +228,8 @@ async function addToPhotos(review_id, photoList) {
     .catch(err => console.log(err))
 }
 
-/** POST REQUSET END**/
 
-//updates helpfulness on reviews table
 function updateHelpfulness(req, res) {
-  //update helpfulness by 1 of product_id
   let stringQuery = `UPDATE reviews SET helpfulness = helpfulness + 1 WHERE id=${req.params.review_id}`
   db.client
     .query(stringQuery)
@@ -251,9 +237,7 @@ function updateHelpfulness(req, res) {
     .catch(res.send(err))
 }
 
-//updates reported on reviews table
 const reported = (req, res) => {
-  //update report status of product_id
   console.log('reported')
   let stringQuery = `UPDATE reviews SET reported = true WHERE id=${req.params.product_id}`
   db.client
@@ -273,44 +257,4 @@ module.exports = {getReviews,
                   updateHelpfulness,
                   reported,
                   cache
-                  // getReviewPhotos,
                 }
-
-                // /**LEGACY GET REQUEST - REVIEWS**/
-
-// async function getReviews(req, res) {
-//   const {product_id, count} = req.query;
-//   if (req.query.product_id !== '') {
-
-//     const reviews = await getData(product_id, count)
-//       .catch(err => res.send(err));
-
-//     const result = await Promise.all(reviews.map(async (review) => {
-//       let photos = await getReviewPhotos(review.id).catch(e => []);
-//       return {
-//         ...review,
-//         photos
-//       }
-//     }))
-
-//   res.send(result)
-//   } else {
-//     res.sendStatus(404)
-//   }
-// }
-
-// //gets record from reviews table
-// async function getData(id, count) {
-//   let stringQuery = `SELECT * FROM reviews WHERE product_id=${id}`;
-//   if (count) {
-//     stringQuery = stringQuery.concat(` LIMIT ${count}`)
-//   };
-//   return db.client.query(stringQuery).then(reviews => reviews.rows)
-// }
-
-// //gets records from review_photos table
-// async function getReviewPhotos(id) {
-//   let stringQuery = `SELECT id, url  FROM reviews_photos WHERE review_id = ${id}`
-//   return db.client.query(stringQuery).then(photos => photos.rows)
-// }
-/**GET REQUEST - REVIEWS END**/
